@@ -62,6 +62,10 @@
 
 ## 三、按键操作
 
+按键名（A/B/X/Y…）经 **SDL_GameController** 解析：PortMaster 启动时已把
+`SDL_GAMECONTROLLERCONFIG_FILE` 指向 PM 自带的 `gamecontrollerdb.txt`，本包**不覆盖**
+按键布局 —— 若你的 CFW 定义了不同的 ABXY 排布，映射会自动跟随该 CFW 的配置。
+
 | 掌机键 | 映射 |
 |---|---|
 | 方向键 / 摇杆 | 方向键 |
@@ -72,6 +76,11 @@
 | L1 / R1 | RightShift / RightCtrl |
 | R3 | 鼠标左键 |
 | 右摇杆 | 鼠标移动 |
+
+**退出游戏**（两种方式，均由 PortMaster 标准机制提供，本包未做任何自定义热键）：
+- **select + start**：gptokeyb 自带的 kill switch，强制结束游戏；
+- 固件的全局退出热键（如 NX-Redux 的系统菜单）同样有效；
+- 游戏内也有退出选项；原 H700 移植内置的组合键（Y+B+select）为温和退出，随移植层保留。
 
 ## 四、已知说明
 

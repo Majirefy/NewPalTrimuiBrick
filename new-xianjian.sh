@@ -160,7 +160,19 @@ if [ -f "$XJ_SHIM" ] && [ "${XJ_SHIM_OFF:-0}" != "1" ]; then
     export XJ_BASE_W=640 XJ_BASE_H=480
     export XJ_SHIM_LOG="$gamedir/logs/shim.log"
     export XJ_MASK="$gamedir/mask.bmp"
-    export LD_PRELOAD="$XJ_SHIM"
+    # xj-shim 需要 dlsym@GLIBC_2.17：glibc < 2.34 时该符号在 libdl.so.2（本机 2.33）。
+    # 包内 SDL2(mali) 的视频驱动会经 system()/execlp() 派生 /bin/sh 子进程，这类
+    # 子进程不链接 libdl，若只 preload shim，子进程加载 shim 时会报
+    # "symbol lookup error: dlsym, version GLIBC_2.17"（出现在启动/退出日志里）。
+    # 把 libdl.so.2 排在 shim 前一并预加载即可（glibc >= 2.34 的 libdl 是转发壳，无害）。
+    XJ_LIBDL=""
+    [ -e "/lib/libdl.so.2" ] && XJ_LIBDL="/lib/libdl.so.2"
+    [ -z "$XJ_LIBDL" ] && [ -e "/usr/lib/libdl.so.2" ] && XJ_LIBDL="/usr/lib/libdl.so.2"
+    if [ -n "$XJ_LIBDL" ]; then
+        export LD_PRELOAD="$XJ_LIBDL:$XJ_SHIM"
+    else
+        export LD_PRELOAD="$XJ_SHIM"
+    fi
     echo "=== shim enabled fill=$XJ_FILL share=$XJ_AUDIO_SHARE ==="
 fi
 
@@ -187,7 +199,12 @@ export SDL_AUDIODRIVER=alsa
 unset AUDIODEV
 
 # ---- 输入：gptokeyb 读取包内 newpal.gptk ----
-# 标题菜单只认鼠标点击：A=左键；MENU 键（gptokeyb hotkey）可退出映射
+# 按键名（a/b/x/y...）经 SDL_GameController 解析：PortMaster 的 control.txt 已把
+# SDL_GAMECONTROLLERCONFIG_FILE 指向 PM 自带 gamecontrollerdb.txt，因此映射跟随
+# 各 CFW 的按键布局（某 CFW 若交换了 ABXY，这里也自动一致），本包不做覆盖。
+# 退出按 PortMaster 标准机制：gptokeyb 的 kill switch（默认 start+select 组合，
+# 由 PM 自带 gptokeyb 决定，本包不定义/不覆盖热键）；CFW 的全局退出热键同样有效。
+# 标题菜单只认鼠标点击：A=左键。
 $GPTOKEYB "machismo" -c "$gamedir/newpal.gptk" &
 
 echo "=== exec machismo $BINARY ==="
