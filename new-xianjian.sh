@@ -133,6 +133,29 @@ fi
 kill_show
 chmod +x "$gamedir/machismo" 2>/dev/null
 
+# ---- 隐藏 iOS 版自带的虚拟按键 / 摇杆提示（默认开；XJ_HIDE_VPAD=0 还原） ----
+# iOS 触屏版检测到触摸拖动时会显示虚拟方向键和 A 键（Resource/dpad*.png）。
+# 本移植把十字键/摇杆映射成"鼠标拖拽"，游戏会误以为在触屏，屏幕上因此浮出
+# 虚拟摇杆/按键提示（通常在指针初始位置，即左上角）。用包内 vpad-blank/ 的
+# 同尺寸全透明 PNG 覆盖即可隐藏；原图备份为同名 .xjbak，随时可还原。
+VPAD_RES="$gamedir/game/Payload/NewPAL.app/Resource"
+VPAD_FILES="dpad.png dpad_u.png dpad_d.png dpad_l.png dpad_r.png dpad_ul.png dpad_ur.png dpad_dl.png dpad_dr.png dpad_A.png dpad_A_click.png dpad_sw.png dpad_sw_click.png"
+if [ "${XJ_HIDE_VPAD:-1}" = "1" ] && [ -d "$VPAD_RES" ]; then
+    for f in $VPAD_FILES; do
+        orig="$VPAD_RES/$f"
+        blank="$gamedir/vpad-blank/$f"
+        [ -f "$orig" ] && [ -f "$blank" ] || continue
+        [ -f "$orig.xjbak" ] || cp "$orig" "$orig.xjbak"
+        cmp -s "$orig" "$blank" 2>/dev/null || cp -f "$blank" "$orig"
+    done
+    echo "=== vpad hidden (XJ_HIDE_VPAD=1) ==="
+elif [ -d "$VPAD_RES" ]; then
+    for f in $VPAD_FILES; do
+        [ -f "$VPAD_RES/$f.xjbak" ] && mv -f "$VPAD_RES/$f.xjbak" "$VPAD_RES/$f"
+    done
+    echo "=== vpad restored (XJ_HIDE_VPAD=0) ==="
+fi
+
 # ---- 运行时库路径（全部相对包内目录；系统仅提供 alsa/z/GLES/EGL） ----
 # exFAT 卡上不能建软链：libc++.so.1 的 DT_NEEDED 是无版本号的 libc.so / libm.so /
 # libdl.so，在 /tmp(tmpfs) 里搭一份别名软链（设备 glibc 2.33，路径为 /lib/...）
