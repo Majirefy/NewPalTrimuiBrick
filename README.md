@@ -26,8 +26,10 @@
 
 **不包含（需要你自己准备）：**
 
-- `game/Payload/NewPAL.app/` —— iOS 版《新仙剑奇侠传》的应用包（含主程序 `NewPAL`、
-  `Music/`、`Video/`、`zh-Hans/StringDB.txt` 等全部资源）
+- iOS 版《新仙剑奇侠传》的游戏数据（含主程序 `NewPAL`、`Music/`、`Video/`、`zh-Hans/StringDB.txt` 等全部资源）
+- 交付形式二选一：
+  - **`.ipa` 文件（推荐）**——直接拷进 port 目录，首次启动自动解压；
+  - 或手动解压出的 `Payload/NewPAL.app/` 目录
 
 **运行时自动生成（无需打包，也请勿从旧安装中拷贝）：** `conf/`（XDG 配置）、`saves/`（存档）、`logs/`（日志）。
 
@@ -39,9 +41,13 @@
      `Roms/Ports (PORTS)/.ports/new-xianjian/`，
      并把 `new-xianjian.sh` 复制一份到 `Roms/Ports (PORTS)/` 根目录、改名为 `新仙剑奇侠传.sh`
      （若用 PortMaster 安装 zip 会自动完成这步）。
-2. **放入游戏数据**：从你合法拥有的 iOS 版《新仙剑奇侠传》中取出 `Payload/NewPAL.app`
-   整个目录，放到 `…/.ports/new-xianjian/game/Payload/NewPAL.app`
-   （最终以 `…/game/Payload/NewPAL.app/NewPAL` 主程序存在为准）。
+2. **放入游戏数据（.ipa）**：把你合法拥有的 iOS 版《新仙剑奇侠传》`.ipa` 文件拷到
+   port 目录里（`…/.ports/new-xianjian/`，文件名任意、扩展名必须是 `.ipa`）。
+   **首次启动时会自动解压**（约 1.7G，需要几分钟，画面看起来无响应是正常的）。
+   解压成功后 SD 卡上会生成 `game/Payload/NewPAL.app/`（以 `NewPAL` 主程序存在为准），
+   之后可以删掉 `.ipa` 腾出空间。
+   - 也可以不拷 `.ipa`，改为手动解压 ipa，把其中的 `Payload/NewPAL.app`
+     整个目录放到 `…/game/Payload/NewPAL.app`。
 3. 回到主界面 → **Ports (PORTS)** → **新仙剑奇侠传** 启动。
 4. 首次启动会自动创建 `conf/ saves/ logs/`。
 

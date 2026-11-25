@@ -44,8 +44,37 @@ echo "=== launch $(date) ==="
 
 APPDIR="$gamedir/game/Payload/NewPAL.app"
 BINARY="$APPDIR/NewPAL"
+
+# ---- 游戏数据：用户把 iOS 版 .ipa 放进 port 目录，首次启动自动解压 ----
 if [ ! -f "$BINARY" ]; then
-    echo "newpal: game executable missing: $BINARY" >&2
+    IPA=""
+    for f in "$gamedir"/*.ipa "$gamedir/game"/*.ipa; do
+        [ -f "$f" ] && IPA="$f" && break
+    done
+    if [ -n "$IPA" ]; then
+        echo "newpal: extracting $(basename "$IPA") -> game/ （首次解压约 1.7G，需要几分钟）"
+        mkdir -p "$gamedir/game"
+        if command -v unzip >/dev/null 2>&1; then
+            (cd "$gamedir/game" && unzip -o -q "$IPA")
+        elif [ -x "$controlfolder/7zzs.aarch64" ]; then
+            (cd "$gamedir/game" && "$controlfolder/7zzs.aarch64" x -y -o"$gamedir/game" "$IPA" >/dev/null)
+        elif [ -x "$controlfolder/bin/7zzs" ]; then
+            (cd "$gamedir/game" && "$controlfolder/bin/7zzs" x -y -o"$gamedir/game" "$IPA" >/dev/null)
+        elif [ -x "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64" ]; then
+            (cd "$gamedir/game" && "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64" x -y -o"$gamedir/game" "$IPA" >/dev/null)
+        else
+            echo "newpal: 系统中没有 unzip/7zzs，无法解压 .ipa；请手动解压 Payload/NewPAL.app 到 game/Payload/" >&2
+            exit 1
+        fi
+        rm -rf "$gamedir/game/__MACOSX"
+        find "$gamedir/game" -name '._*' -exec rm -f {} \; 2>/dev/null
+    fi
+fi
+
+if [ ! -f "$BINARY" ]; then
+    echo "newpal: 游戏数据缺失。" >&2
+    echo "newpal: 请把 iOS 版《新仙剑奇侠传》的 .ipa 文件拷到 port 目录（$gamedir/）后重新启动，" >&2
+    echo "newpal: 或手动解压得到 game/Payload/NewPAL.app/NewPAL。" >&2
     exit 1
 fi
 chmod +x "$gamedir/machismo" 2>/dev/null
