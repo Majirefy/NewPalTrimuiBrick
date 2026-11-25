@@ -88,6 +88,9 @@
   依赖系统 asound.conf 的 dmix（NX-Redux 自带）。若你的固件不支持 dmix，
   可在启动脚本里改 `XJ_AUDIO_SHARE=1` 启用进程内混音（可能变调，仅作回退）。
 - **存档**：位于 port 目录的 `saves/`，与游戏数据无关，可自由备份。
+- **封面**：仓库根目录的 `new-xianjian.png` 即游戏封面。NX-Redux 会在启动时自动
+  把它放到 `Roms/Ports (PORTS)/.media/新仙剑奇侠传.png` 供列表显示；
+  提交 PortMaster 官方目录时也用这张图（命名与端口 ID 一致）。
 - **日志排错**：`logs/local.log`（引擎）、`logs/shim.log`（补丁层）。
 - **画面**：游戏原生 640x480，以 1.6 倍等比铺满 1024x768 面板；
   更换 `XJ_FILL=mask|crop|off` 可切换铺屏策略。
