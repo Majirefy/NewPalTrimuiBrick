@@ -46,6 +46,17 @@ APPDIR="$gamedir/game/Payload/NewPAL.app"
 BINARY="$APPDIR/NewPAL"
 
 # ---- 游戏数据：用户把 iOS 版 .ipa 放进 port 目录，首次启动自动解压 ----
+# 首次解压用 show2.elf 在屏幕上显示进度条，解压校验通过后自动删除 .ipa
+SHOW2="/mnt/SDCARD/.system/bin/show2.elf"
+show_text() { # $1=文字 $2=进度(-1 表示不确定的转圈条, 0-100 为进度条)
+    [ -x "$SHOW2" ] || return 0
+    killall -9 show2.elf >/dev/null 2>&1
+    LD_LIBRARY_PATH="$gamedir/libs.aarch64:/mnt/SDCARD/Emus/shared/PortMaster/lib:${LD_LIBRARY_PATH:-}" \
+        "$SHOW2" --mode=progress --image=/dev/null --text="$1" --progress="$2" \
+        --texty=45 --progressy=55 --fontsize=28 >/dev/null 2>&1 &
+}
+kill_show() { killall -9 show2.elf >/dev/null 2>&1; }
+
 if [ ! -f "$BINARY" ]; then
     IPA=""
     for f in "$gamedir"/*.ipa "$gamedir/game"/*.ipa; do
@@ -54,29 +65,72 @@ if [ ! -f "$BINARY" ]; then
     if [ -n "$IPA" ]; then
         echo "newpal: extracting $(basename "$IPA") -> game/ （首次解压约 1.7G，需要几分钟）"
         mkdir -p "$gamedir/game"
+
+        # 解压器：优先 unzip；回退 PortMaster 自带 7zzs。
+        # 注意 7zzs 用新版语法 l/x（不支持 -l/-o），统计文件数用 "....." 文件行计数。
         if command -v unzip >/dev/null 2>&1; then
-            (cd "$gamedir/game" && unzip -o -q "$IPA")
-        elif [ -x "$controlfolder/7zzs.aarch64" ]; then
-            (cd "$gamedir/game" && "$controlfolder/7zzs.aarch64" x -y -o"$gamedir/game" "$IPA" >/dev/null)
-        elif [ -x "$controlfolder/bin/7zzs" ]; then
-            (cd "$gamedir/game" && "$controlfolder/bin/7zzs" x -y -o"$gamedir/game" "$IPA" >/dev/null)
-        elif [ -x "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64" ]; then
-            (cd "$gamedir/game" && "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64" x -y -o"$gamedir/game" "$IPA" >/dev/null)
+            UNZIPPER=unzip
+            TOTAL=$("$UNZIPPER" -l "$IPA" 2>/dev/null | tail -1 | awk '{print $1}')
+        elif [ -x "$controlfolder/7zzs.aarch64" ] || [ -x "$controlfolder/bin/7zzs" ] \
+             || [ -x "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64" ]; then
+            for _cand in "$controlfolder/7zzs.aarch64" "$controlfolder/bin/7zzs" \
+                         "/mnt/SDCARD/Emus/shared/PortMaster/7zzs.aarch64"; do
+                if [ -x "$_cand" ]; then UNZIPPER="$_cand"; break; fi
+            done
+            TOTAL=$("$UNZIPPER" l "$IPA" 2>/dev/null | grep -c '\.\.\.\.\.')
         else
+            show_text "缺少解压工具，无法安装" -1
             echo "newpal: 系统中没有 unzip/7zzs，无法解压 .ipa；请手动解压 Payload/NewPAL.app 到 game/Payload/" >&2
+            kill_show
             exit 1
         fi
+        case "$TOTAL" in ''|*[!0-9]*) TOTAL="" ;; esac
+
+        show_text "正在解压游戏数据（首次启动，请勿关机）…" -1
+        if [ "$UNZIPPER" = "unzip" ]; then
+            ( cd "$gamedir/game" && "$UNZIPPER" -o -q "$IPA" >/dev/null 2>&1 ) &
+        else
+            ( cd "$gamedir/game" && "$UNZIPPER" x -y "$IPA" >/dev/null 2>&1 ) &
+        fi
+        UNZIP_PID=$!
+        while kill -0 "$UNZIP_PID" 2>/dev/null; do
+            if [ -n "$TOTAL" ]; then
+                DONE=$(find "$gamedir/game" -type f 2>/dev/null | wc -l)
+                PCT=$(( DONE * 100 / TOTAL )); [ "$PCT" -gt 100 ] && PCT=100
+                show_text "首次启动：正在解压游戏数据 $PCT%（$DONE/$TOTAL）" "$PCT"
+            fi
+            sleep 2
+        done
+        wait "$UNZIP_PID" 2>/dev/null
         rm -rf "$gamedir/game/__MACOSX"
         find "$gamedir/game" -name '._*' -exec rm -f {} \; 2>/dev/null
+
+        # 校验：主程序存在且解压文件数合理，通过后删除 .ipa 腾出空间
+        show_text "正在校验解压结果…" -1
+        DONE=$(find "$gamedir/game" -type f 2>/dev/null | wc -l)
+        if [ -f "$BINARY" ] && { [ -z "$TOTAL" ] || [ "$DONE" -ge "$TOTAL" ]; }; then
+            show_text "解压完成，正在清理安装包…" 100
+            echo "newpal: extraction verified ($DONE files), removing ipa"
+            rm -f "$IPA"
+            sleep 1
+        else
+            show_text "解压/校验失败！保留 .ipa，请重试或手动解压" -1
+            echo "newpal: extraction FAILED (binary=$([ -f "$BINARY" ] && echo ok || echo missing), files=$DONE/$TOTAL), keeping ipa" >&2
+            sleep 3
+            kill_show
+            exit 1
+        fi
+    else
+        show_text "未找到游戏数据！请把 iOS 版 .ipa 拷到本目录" -1
+        echo "newpal: 游戏数据缺失。" >&2
+        echo "newpal: 请把 iOS 版《新仙剑奇侠传》的 .ipa 文件拷到 port 目录（$gamedir/）后重新启动，" >&2
+        echo "newpal: 或手动解压得到 game/Payload/NewPAL.app/NewPAL。" >&2
+        sleep 3
+        kill_show
+        exit 1
     fi
 fi
-
-if [ ! -f "$BINARY" ]; then
-    echo "newpal: 游戏数据缺失。" >&2
-    echo "newpal: 请把 iOS 版《新仙剑奇侠传》的 .ipa 文件拷到 port 目录（$gamedir/）后重新启动，" >&2
-    echo "newpal: 或手动解压得到 game/Payload/NewPAL.app/NewPAL。" >&2
-    exit 1
-fi
+kill_show
 chmod +x "$gamedir/machismo" 2>/dev/null
 
 # ---- 运行时库路径（全部相对包内目录；系统仅提供 alsa/z/GLES/EGL） ----
