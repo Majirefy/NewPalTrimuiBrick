@@ -1,0 +1,5 @@
+game/
+saves/
+logs/
+conf/
+.DS_Store
