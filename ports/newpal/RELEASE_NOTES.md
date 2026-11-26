@@ -1,8 +1,16 @@
-# NewPal v1.0.0 — 首个正式版本
+# NewPal v1.0.1 — 修复版
 
-这是 NewPal 的第一个 Release。此版本只发布 **PortMaster 运行框架**，不包含任何商业游戏数据或 `.ipa` 文件。
+此版本修复 v1.0.0 在部分 TrimUI Brick / NX-Redux 设备上无法启动的问题。
+仍然只发布 **PortMaster 运行框架**，不包含任何商业游戏数据或 `.ipa` 文件。
 
-## 本版本发布内容
+## 修复内容
+
+- 将 `libz.so.1` 随包放入 `newpal/libs.aarch64/`
+- 修复 `libpng16.so.16: undefined symbol: inflateValidate, version ZLIB_1.2.9`
+  导致的 machismo 加载失败与段错误
+- 该问题在固件 zlib 较旧的设备上会出现；v1.0.0 未包含该库
+
+## 发布内容
 
 发布资产：`newpal.zip`（另附 `newpal.zip.sha256` 校验文件）。
 
@@ -14,7 +22,7 @@ newpal/
 ├── newpal.port.json
 ├── machismo
 ├── libsword3_*.so / libsystem_shim.so / xj-shim.so
-├── libs.aarch64/
+├── libs.aarch64/        # 含 libz.so.1
 ├── glibc-libs/
 ├── licenses/
 ├── vpad-blank/
