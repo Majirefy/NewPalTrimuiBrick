@@ -162,7 +162,14 @@ COVER_SRC="$gamedir/cover.png"
 ROMS_MEDIA="/mnt/SDCARD/Roms/Ports (PORTS)/.media"
 if [ -f "$COVER_SRC" ] && [ -d "/mnt/SDCARD/Roms/Ports (PORTS)" ]; then
     mkdir -p "$ROMS_MEDIA"
-    cmp -s "$COVER_SRC" "$ROMS_MEDIA/NewPal.png" 2>/dev/null || cp -f "$COVER_SRC" "$ROMS_MEDIA/NewPal.png"
+    # NX-Redux uses the launcher basename for boxart. Keep NewPal.png as a
+    # compatibility alias in case the launcher is renamed.
+    COVER_NAME="$(basename "$0" .sh).png"
+    [ -n "$COVER_NAME" ] || COVER_NAME="NewPal.png"
+    for name in "$COVER_NAME" "NewPal.png"; do
+        [ -n "$name" ] || continue
+        cmp -s "$COVER_SRC" "$ROMS_MEDIA/$name" 2>/dev/null || cp -f "$COVER_SRC" "$ROMS_MEDIA/$name"
+    done
 fi
 
 # ---- 运行时库路径（全部相对包内目录；系统仅提供 alsa/z/GLES/EGL） ----

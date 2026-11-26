@@ -1,14 +1,19 @@
-# NewPal v1.0.1 — 修复版
+# NewPal v1.0.2 — 封面修复版
 
-此版本修复 v1.0.0 在部分 TrimUI Brick / NX-Redux 设备上无法启动的问题。
+此版本修复 v1.0.0/v1.0.1 在 NX-Redux 上封面不显示的问题。
 仍然只发布 **PortMaster 运行框架**，不包含任何商业游戏数据或 `.ipa` 文件。
 
-## 修复内容
+## 本次修复内容
+
+- 启动器现在按启动脚本文件名放置封面，例如 `新仙剑奇侠传.sh` → `.media/新仙剑奇侠传.png`
+- 同时保留 `NewPal.png` 作为兼容别名
+- 之前版本只写死 `NewPal.png`，而 NX-Redux 需要封面文件名与启动器文件名一致
+
+## 继承 v1.0.1 的修复
 
 - 将 `libz.so.1` 随包放入 `newpal/libs.aarch64/`
 - 修复 `libpng16.so.16: undefined symbol: inflateValidate, version ZLIB_1.2.9`
   导致的 machismo 加载失败与段错误
-- 该问题在固件 zlib 较旧的设备上会出现；v1.0.0 未包含该库
 
 ## 发布内容
 
