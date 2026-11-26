@@ -1,0 +1,35 @@
+{
+  "version": 4,
+  "name": "newpal.zip",
+  "items": [
+    "NewPal.sh",
+    "newpal/"
+  ],
+  "items_opt": [],
+  "attr": {
+    "title": "New Pal",
+    "porter": [
+      "Majirefy"
+    ],
+    "desc": "A port of the iOS version of 新仙剑奇侠传 (The Legend of Sword and Fairy / NewPAL), a classic Chinese RPG by Softstar.",
+    "desc_md": "A port of the iOS version of **新仙剑奇侠传** (*The Legend of Sword and Fairy* / *NewPAL*), a classic Chinese RPG by Softstar.",
+    "inst": "- Install the port via PortMaster.\n- Legally obtain the iOS version of 新仙剑奇侠传 as an .ipa file. No game data is included in this port.\n- Copy the .ipa file into the newpal/ port folder.\n- Launch the port; the first run extracts the game automatically (about 1.7 GB, a few minutes). The .ipa is removed after successful verification.\n- Requires an aarch64 device with glibc. Tested on TrimUI Brick (NX-Redux).",
+    "inst_md": "- Install the port via PortMaster.\n- Legally obtain the iOS version of 新仙剑奇侠传 (NewPAL) as an `.ipa` file. **No game data is included in this port.**\n- Copy the `.ipa` into the `newpal/` port folder (the folder is also printed in the on-screen message when data is missing).\n- Launch the port: the first run shows an on-screen extraction progress bar, then automatically verifies and removes the `.ipa`.\n- Requires an aarch64 device with glibc; audio uses the system ALSA dmix. Tested on TrimUI Brick / NX-Redux.",
+    "genres": [
+      "rpg"
+    ],
+    "image": null,
+    "rtr": false,
+    "exp": false,
+    "runtime": [],
+    "store": [],
+    "availability": "paid",
+    "reqs": [
+      "trimui-brick"
+    ],
+    "arch": [
+      "aarch64"
+    ],
+    "min_glibc": ""
+  }
+}

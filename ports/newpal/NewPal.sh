@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PORTMASTER: new-xianjian.zip, 新仙剑奇侠传.sh
+# PORTMASTER: newpal.zip, NewPal.sh
 #
 # 新仙剑奇侠传 (NewPAL) —— iOS 版二进制经 machismo 加载器在 aarch64 Linux 上运行。
 # machismo 把 iOS arm64 Mach-O (game/Payload/NewPAL.app/NewPAL) 加载进进程，
@@ -35,7 +35,7 @@ source $controlfolder/control.txt
 source $controlfolder/tasksetter
 get_controls
 
-export gamedir="/$directory/ports/new-xianjian"
+export gamedir="/$directory/ports/newpal"
 cd "$gamedir" || exit 1
 
 mkdir -p "$gamedir/logs" "$gamedir/conf" "$gamedir/saves"
@@ -156,6 +156,15 @@ elif [ -d "$VPAD_RES" ]; then
     echo "=== vpad restored (XJ_HIDE_VPAD=0) ==="
 fi
 
+# ---- 封面：若固件的 Ports 封面目录存在，自动放置（供 NX-Redux 列表显示） ----
+# 路径为 TrimUI Brick / NX-Redux 专用；其他固件不存在该目录则静默跳过。
+COVER_SRC="$gamedir/cover.png"
+ROMS_MEDIA="/mnt/SDCARD/Roms/Ports (PORTS)/.media"
+if [ -f "$COVER_SRC" ] && [ -d "/mnt/SDCARD/Roms/Ports (PORTS)" ]; then
+    mkdir -p "$ROMS_MEDIA"
+    cmp -s "$COVER_SRC" "$ROMS_MEDIA/NewPal.png" 2>/dev/null || cp -f "$COVER_SRC" "$ROMS_MEDIA/NewPal.png"
+fi
+
 # ---- 运行时库路径（全部相对包内目录；系统仅提供 alsa/z/GLES/EGL） ----
 # exFAT 卡上不能建软链：libc++.so.1 的 DT_NEEDED 是无版本号的 libc.so / libm.so /
 # libdl.so，在 /tmp(tmpfs) 里搭一份别名软链（设备 glibc 2.33，路径为 /lib/...）
@@ -220,6 +229,10 @@ export SDL_VIDEODRIVER=mali
 # ---- 音频：系统 asound.conf 已带 dmix，两路音频天然共存 ----
 export SDL_AUDIODRIVER=alsa
 unset AUDIODEV
+
+# ---- PortMaster runtime: per-CFW controller mapping and platform helper ----
+[ -n "${sdl_controllerconfig:-}" ] && export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
+command -v pm_platform_helper >/dev/null 2>&1 && pm_platform_helper "$gamedir/machismo"
 
 # ---- 输入：gptokeyb 读取包内 newpal.gptk ----
 # 按键名（a/b/x/y...）经 SDL_GameController 解析：PortMaster 的 control.txt 已把

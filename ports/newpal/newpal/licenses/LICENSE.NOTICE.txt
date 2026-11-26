@@ -1,0 +1,59 @@
+NewPAL port - bundled component provenance and licenses
+========================================================
+
+This port bundles runtime libraries only. No game data, artwork from the game,
+or copyrighted game binaries are included. The end user must supply their own
+legally acquired iOS .ipa of 新仙剑奇侠传 (NewPAL), by Softstar Entertainment.
+
+Components
+----------
+
+machismo (machismo) - Mach-O loader from the H700 handheld port of NewPAL.
+  Source/provenance: H700 community port; see https://github.com/Majirefy/NewPalTrimuiBrick
+  License: NOT DOCUMENTED in the source package. Please contact the original
+  porter before distribution if a license confirmation is required.
+
+libsword3_host.so, libsword3_ios_shim.so, libsword3_objc_shim.so,
+libsword3_gl_bridge.so, libsystem_shim.so, xj-shim.so, address-hooks.conf,
+dylib_map.conf, patches.conf, machismo*.conf, mask.bmp, vpad-blank/*.png -
+  Original shim/patch layer from the same H700 port, modified for this port.
+  License: NOT DOCUMENTED in the source package (same note as machismo).
+
+libs.aarch64/libSDL2-2.0.so.0, libSDL2.so, libs.aarch64/libSDL2_mixer-2.0.so.0 -
+  SDL2 / SDL2_mixer, zlib license. See SDL2.txt and SDL2_mixer.txt.
+  https://github.com/libsdl-org/SDL , https://github.com/libsdl-org/SDL_mixer
+  (Custom mali-fbdev SDL2 build from TrimUI firmware, redistributed under zlib.)
+
+libs.aarch64/libavcodec.so.58 (+ .aacless), libavformat.so.58, libavutil.so.56,
+libswresample.so.3, libswscale.so.5 -
+  FFmpeg 58, LGPL v2.1 or later. See FFmpeg.md and FFmpeg-COPYING.LGPLv2.1.
+  https://ffmpeg.org/legal.html
+  Note: libavcodec.so.58 was binary-patched only to lower the required glibc
+  symbol versions (2.34/2.35 -> 2.17) for the device's glibc 2.33.
+
+libs.aarch64/libpng16.so.16 - libpng, libpng license. See libpng.txt.
+glibc-libs/libSDL2_ttf-2.0.so.0 - SDL2_ttf, zlib license. See SDL2_ttf.txt.
+glibc-libs/libSDL2_image-2.0.so.0 - SDL2_image, zlib license. See SDL2_image.txt.
+glibc-libs/libdeflate.so.0 - libdeflate, MIT license. See libdeflate.txt.
+glibc-libs/libjpeg.so.62 - libjpeg-turbo, its multi-license notice. See
+  libjpeg-turbo.md.
+glibc-libs/libwebp.so.6 - libwebp, BSD-style license. See libwebp.txt.
+glibc-libs/libjbig.so.0 - libjbig, GPL-2.0 only; see the GPLv2 text included in
+  gptokeyb.md. If your distribution requires pure LGPL-compatible components,
+  remove this file (it is only needed by libtiff for JBIG images).
+glibc-libs/libtiff.so.5 - libtiff, HPND-style license. See libtiff.txt.
+libs.aarch64/libstdc++.so.6 - GCC runtime library, GPL v3 with the GCC Runtime
+  Library Exception 3.1: https://www.gnu.org/licenses/gcc-exception-3.1.txt
+libc++.so.1 - LLVM libc++ (glibc-patched build), Apache License 2.0 with LLVM
+  exceptions. See libcxx-Apache-2.0.txt. https://libcxx.llvm.org/
+libz.so.1 (bundled via PortMaster/external) - zlib license. See zlib.txt.
+
+gptokeyb is NOT bundled in this port; it is supplied by the PortMaster runtime.
+Its license is included for reference: gptokeyb.md (GPL v2).
+https://github.com/PortsMaster/gptokeyb
+
+The transparent PNGs in vpad-blank/ were generated for this port (fully
+transparent, same dimensions as the originals) and contain no third-party
+artwork. cover.png is user-supplied artwork for this port's listing only.
+
+Port packaging and source: https://github.com/Majirefy/NewPalTrimuiBrick

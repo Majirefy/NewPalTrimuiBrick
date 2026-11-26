@@ -1,0 +1,43 @@
+name: Build and publish NewPal release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag, for example v1.0.1'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the release ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Build newpal.zip
+        run: ./tools/build_release.sh
+
+      - name: Generate checksum
+        run: sha256sum newpal.zip > newpal.zip.sha256
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: NewPal ${{ inputs.tag || github.ref_name }}
+          body_path: ports/newpal/RELEASE_NOTES.md
+          files: |
+            newpal.zip
+            newpal.zip.sha256
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

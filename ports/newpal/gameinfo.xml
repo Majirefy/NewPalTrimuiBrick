@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gameList>
+  <game>
+    <path>./NewPal.sh</path>
+    <name>NewPAL</name>
+    <desc>新仙剑奇侠传 (The Legend of Sword and Fairy / NewPAL) - classic Chinese role-playing game by Softstar.</desc>
+    <releasedate>20010721T000000</releasedate>
+    <developer>Softstar Entertainment (大宇資訊)</developer>
+    <publisher>Softstar Entertainment (大宇資訊)</publisher>
+    <genre>RPG</genre>
+    <image>./cover.png</image>
+  </game>
+</gameList>
